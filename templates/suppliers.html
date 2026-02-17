@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+{% block title %}Suppliers - Supermarket{% endblock %}
+{% block page_title %}Suppliers{% endblock %}
+
+{% block content %}
+<div class="row g-3">
+    <!-- Left: Supplier List -->
+    <div class="col-lg-5">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-truck me-2"></i>Suppliers</span>
+                <a href="{{ url_for('suppliers') }}" class="btn btn-sm btn-success"
+                   onclick="event.preventDefault(); clearSupplierForm();">
+                    <i class="bi bi-plus-lg me-1"></i>New
+                </a>
+            </div>
+            <div class="card-body p-0">
+                {% if suppliers %}
+                <div class="list-group list-group-flush">
+                    {% for s in suppliers %}
+                    <a href="{{ url_for('suppliers', supplier_id=s.id) }}"
+                       class="list-group-item list-group-item-action {% if selected and selected.id == s.id %}active{% endif %}">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="fw-medium">{{ s.name }}</div>
+                                <small class="{% if selected and selected.id == s.id %}text-white-50{% else %}text-muted{% endif %}">
+                                    {{ s.phone or 'No phone' }} &middot; {{ s.email or 'No email' }}
+                                </small>
+                            </div>
+                            <i class="bi bi-chevron-right"></i>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <i class="bi bi-truck d-block"></i>
+                    <p class="mb-0">No suppliers yet</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Right: Details & Linked Products -->
+    <div class="col-lg-7">
+        <!-- Supplier Details -->
+        <div class="card mb-3">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-person-lines-fill me-2"></i>Supplier Details</span>
+                {% if selected %}
+                <button class="btn btn-sm btn-outline-danger"
+                        onclick="deleteSupplier({{ selected.id }}, '{{ selected.name|e }}')">
+                    <i class="bi bi-trash me-1"></i>Delete
+                </button>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <input type="hidden" id="supplier-id" value="{{ selected.id if selected else '' }}">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label small text-muted">Name <span class="text-danger">*</span></label>
+                        <input type="text" id="supplier-name" class="form-control"
+                               value="{{ selected.name if selected else '' }}"
+                               placeholder="Supplier name...">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small text-muted">Phone</label>
+                        <input type="text" id="supplier-phone" class="form-control"
+                               value="{{ selected.phone if selected and selected.phone else '' }}"
+                               placeholder="Phone number...">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small text-muted">Email</label>
+                        <input type="email" id="supplier-email" class="form-control"
+                               value="{{ selected.email if selected and selected.email else '' }}"
+                               placeholder="Email address...">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small text-muted">Address</label>
+                        <input type="text" id="supplier-address" class="form-control"
+                               value="{{ selected.address if selected and selected.address else '' }}"
+                               placeholder="Address...">
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <button class="btn btn-primary" onclick="saveSupplier()">
+                        <i class="bi bi-check-lg me-1"></i>Save
+                    </button>
+                    <a href="{{ url_for('suppliers') }}" class="btn btn-outline-secondary ms-2">Cancel</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Linked Products -->
+        {% if selected %}
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-link-45deg me-2"></i>Linked Products</span>
+                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#linkProductModal">
+                    <i class="bi bi-plus-lg me-1"></i>Link Product
+                </button>
+            </div>
+            <div class="card-body p-0">
+                {% if linked_products %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th class="text-end">Retail Price</th>
+                                <th class="text-end">Supply Price</th>
+                                <th style="width:50px"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in linked_products %}
+                            <tr>
+                                <td class="fw-medium">{{ p.name }}</td>
+                                <td class="text-end">${{ "%.2f"|format(p.price) }}</td>
+                                <td class="text-end">
+                                    {% if p.supply_price is not none %}
+                                    ${{ "%.2f"|format(p.supply_price) }}
+                                    {% else %}
+                                    <span class="text-muted">N/A</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-danger btn-action"
+                                            onclick="unlinkProduct({{ selected.id }}, {{ p.id }})">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="empty-state py-3">
+                    <i class="bi bi-link-45deg d-block" style="font-size:2rem"></i>
+                    <p class="mb-0 small">No products linked yet</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Link Product Modal -->
+        <div class="modal fade" id="linkProductModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Link Product to {{ selected.name }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Product</label>
+                            <select id="link-product-id" class="form-select">
+                                <option value="">Select a product...</option>
+                                {% for p in products %}
+                                <option value="{{ p.id }}">{{ p.name }} ({{ p.barcode or 'N/A' }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Supply Price</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" id="link-supply-price" class="form-control"
+                                       step="0.01" min="0" value="0.00">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" onclick="linkProduct({{ selected.id }})">
+                            Link Product
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function clearSupplierForm() {
+    document.getElementById("supplier-id").value = "";
+    document.getElementById("supplier-name").value = "";
+    document.getElementById("supplier-phone").value = "";
+    document.getElementById("supplier-email").value = "";
+    document.getElementById("supplier-address").value = "";
+    document.getElementById("supplier-name").focus();
+}
+</script>
+{% endblock %}

@@ -6,13 +6,24 @@ DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "supermarket.
 _conn = None
 
 
+def _make_connection():
+    conn = sqlite3.connect(DB_PATH)
+    conn.execute("PRAGMA foreign_keys = ON")
+    conn.row_factory = sqlite3.Row
+    return conn
+
+
 def get_connection():
-    global _conn
-    if _conn is None:
-        _conn = sqlite3.connect(DB_PATH)
-        _conn.execute("PRAGMA foreign_keys = ON")
-        _conn.row_factory = sqlite3.Row
-    return _conn
+    try:
+        from flask import g
+        if "db" not in g:
+            g.db = _make_connection()
+        return g.db
+    except (ImportError, RuntimeError):
+        global _conn
+        if _conn is None:
+            _conn = _make_connection()
+        return _conn
 
 
 def init_db():

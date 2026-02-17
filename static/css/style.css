@@ -1,0 +1,241 @@
+/* ── Sidebar ─────────────────────────────────────────────────── */
+.sidebar {
+    width: 260px;
+    min-height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1040;
+    background: linear-gradient(180deg, #1a1d23 0%, #212529 100%);
+    padding-top: 0;
+    overflow-y: auto;
+}
+
+.store-brand {
+    color: #fff;
+    font-size: 1.3rem;
+    font-weight: 700;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    letter-spacing: 0.02em;
+}
+
+.sidebar .nav-link {
+    color: rgba(255, 255, 255, 0.6);
+    padding: 0.8rem 1.5rem;
+    font-size: 0.93rem;
+    font-weight: 500;
+    border-left: 3px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.sidebar .nav-link:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.05);
+    border-left-color: rgba(255, 255, 255, 0.2);
+}
+
+.sidebar .nav-link.active {
+    color: #fff;
+    background: rgba(13, 110, 253, 0.15);
+    border-left-color: #0d6efd;
+}
+
+.sidebar .nav-link i {
+    font-size: 1.1rem;
+    width: 1.5rem;
+    text-align: center;
+}
+
+.sidebar-footer {
+    padding: 1rem 1.5rem;
+    color: rgba(255, 255, 255, 0.3);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* ── Main Content ────────────────────────────────────────────── */
+.main-content {
+    margin-left: 260px;
+    padding: 2rem;
+    min-height: 100vh;
+    background: #f0f2f5;
+}
+
+/* ── Stat Cards ──────────────────────────────────────────────── */
+.stat-card {
+    border: none;
+    border-left: 4px solid;
+    border-radius: 0.5rem;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    background: #fff;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.stat-label {
+    color: #6c757d;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+}
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+}
+
+/* Color variants */
+.border-primary .stat-value { color: #0d6efd; }
+.border-success .stat-value { color: #198754; }
+.border-warning .stat-value { color: #fd7e14; }
+.border-purple { border-left-color: #6f42c1 !important; }
+.border-purple .stat-value { color: #6f42c1; }
+
+.bg-primary-subtle { background: rgba(13, 110, 253, 0.1); color: #0d6efd; }
+.bg-success-subtle { background: rgba(25, 135, 84, 0.1); color: #198754; }
+.bg-warning-subtle { background: rgba(253, 126, 20, 0.1); color: #fd7e14; }
+.bg-purple-subtle { background: rgba(111, 66, 193, 0.1); color: #6f42c1; }
+
+/* ── Tables ──────────────────────────────────────────────────── */
+.table th {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #6c757d;
+    font-weight: 600;
+    border-bottom-width: 1px;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+.low-stock-critical { background-color: #f8d7da !important; }
+.low-stock-warning { background-color: #fff3cd !important; }
+
+/* ── Cards ───────────────────────────────────────────────────── */
+.card {
+    border: none;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.card-header {
+    background: #fff;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+/* ── POS / Cart ──────────────────────────────────────────────── */
+.cart-summary .total-line {
+    font-size: 1.6rem;
+    font-weight: 700;
+}
+
+.checkout-btn {
+    font-size: 1.1rem;
+    padding: 0.75rem;
+    font-weight: 600;
+}
+
+/* ── Receipt ─────────────────────────────────────────────────── */
+.receipt-container {
+    max-width: 440px;
+    margin: 2rem auto;
+    font-family: 'Courier New', Courier, monospace;
+    background: #fffff8;
+    padding: 2rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+}
+
+@media print {
+    .no-print { display: none !important; }
+    .sidebar { display: none !important; }
+    .main-content { margin-left: 0; padding: 0; background: #fff; }
+    .receipt-container {
+        border: none;
+        box-shadow: none;
+        margin: 0;
+        max-width: 100%;
+    }
+}
+
+/* ── Toast ───────────────────────────────────────────────────── */
+#toast-container {
+    z-index: 1090;
+}
+
+/* ── Badges ──────────────────────────────────────────────────── */
+.badge-stock {
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+/* ── Search bar ──────────────────────────────────────────────── */
+.search-bar .form-control:focus {
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+}
+
+/* ── Mobile Toggle ───────────────────────────────────────────── */
+.sidebar-toggle {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 1050;
+    display: none;
+}
+
+/* ── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 991.98px) {
+    .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+    .sidebar.show {
+        transform: translateX(0);
+    }
+    .main-content {
+        margin-left: 0;
+    }
+    .sidebar-toggle {
+        display: block;
+    }
+}
+
+/* ── Misc ────────────────────────────────────────────────────── */
+.cursor-pointer { cursor: pointer; }
+
+.btn-action {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.85rem;
+}
+
+.empty-state {
+    padding: 3rem;
+    text-align: center;
+    color: #6c757d;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.4;
+}

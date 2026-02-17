@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - Supermarket{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<!-- Stat Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="card stat-card border-primary">
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="stat-value">{{ stats.total_products }}</div>
+                    <div class="stat-label">Total Products</div>
+                </div>
+                <div class="stat-icon bg-primary-subtle">
+                    <i class="bi bi-box-seam"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card stat-card border-success">
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="stat-value">{{ stats.total_categories }}</div>
+                    <div class="stat-label">Categories</div>
+                </div>
+                <div class="stat-icon bg-success-subtle">
+                    <i class="bi bi-tags"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card stat-card border-warning">
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="stat-value {% if stats.low_stock_count > 0 %}text-danger{% endif %}">
+                        {{ stats.low_stock_count }}
+                    </div>
+                    <div class="stat-label">Low Stock Alerts</div>
+                </div>
+                <div class="stat-icon bg-warning-subtle">
+                    <i class="bi bi-exclamation-triangle"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card stat-card border-purple">
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="stat-value">${{ "%.2f"|format(stats.today_revenue) }}</div>
+                    <div class="stat-label">Today's Revenue</div>
+                </div>
+                <div class="stat-icon bg-purple-subtle">
+                    <i class="bi bi-currency-dollar"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tables Row -->
+<div class="row g-3">
+    <!-- Low Stock Alerts -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-exclamation-triangle me-2 text-warning"></i>Low Stock Alerts</span>
+                <span class="badge bg-warning text-dark">{{ low_stock|length }}</span>
+            </div>
+            <div class="card-body p-0">
+                {% if low_stock %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th class="text-center">Stock</th>
+                                <th class="text-center">Threshold</th>
+                                <th class="text-center">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in low_stock %}
+                            <tr class="{% if p.stock <= p.low_stock_threshold // 2 %}low-stock-critical{% else %}low-stock-warning{% endif %}">
+                                <td>{{ p.name }}</td>
+                                <td class="text-center fw-bold">{{ p.stock }}</td>
+                                <td class="text-center">{{ p.low_stock_threshold }}</td>
+                                <td class="text-center">
+                                    {% if p.stock <= p.low_stock_threshold // 2 %}
+                                    <span class="badge bg-danger badge-stock">Critical</span>
+                                    {% else %}
+                                    <span class="badge bg-warning text-dark badge-stock">Low</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <i class="bi bi-check-circle d-block"></i>
+                    <p class="mb-0">All products are well-stocked</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Sales -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-receipt me-2 text-primary"></i>Recent Sales</span>
+                <span class="badge bg-primary">{{ recent_sales|length }}</span>
+            </div>
+            <div class="card-body p-0">
+                {% if recent_sales %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Sale #</th>
+                                <th>Date</th>
+                                <th class="text-center">Items</th>
+                                <th class="text-end">Total</th>
+                                <th class="text-center">Payment</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for s in recent_sales %}
+                            <tr class="cursor-pointer" onclick="window.open('/receipt/{{ s.id }}', '_blank')">
+                                <td><span class="text-primary fw-bold">#{{ s.id }}</span></td>
+                                <td>{{ s.created_at[:16] if s.created_at else '' }}</td>
+                                <td class="text-center">{{ s.item_count }}</td>
+                                <td class="text-end fw-bold">${{ "%.2f"|format(s.total) }}</td>
+                                <td class="text-center">
+                                    <span class="badge bg-secondary">{{ s.payment_method }}</span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <i class="bi bi-cart-x d-block"></i>
+                    <p class="mb-0">No sales recorded yet</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

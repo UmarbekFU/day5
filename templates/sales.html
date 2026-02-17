@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+{% block title %}Sales & Billing - Supermarket{% endblock %}
+{% block page_title %}Sales & Billing{% endblock %}
+
+{% block content %}
+<div class="row g-3">
+    <!-- Left: Cart Area -->
+    <div class="col-lg-7">
+        <!-- Product Lookup -->
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="row g-2 align-items-end">
+                    <div class="col">
+                        <label class="form-label small text-muted">Barcode or Product Name</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-upc-scan"></i></span>
+                            <input type="text" id="product-search" class="form-control form-control-lg"
+                                   placeholder="Scan barcode or type name..."
+                                   onkeydown="if(event.key==='Enter'){event.preventDefault();addToCart();}">
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <label class="form-label small text-muted">Qty</label>
+                        <input type="number" id="cart-qty" class="form-control form-control-lg"
+                               value="1" min="1" style="width: 80px;"
+                               onkeydown="if(event.key==='Enter'){event.preventDefault();addToCart();}">
+                    </div>
+                    <div class="col-auto">
+                        <button class="btn btn-primary btn-lg" onclick="addToCart()">
+                            <i class="bi bi-plus-lg me-1"></i>Add
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cart Table -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-cart3 me-2"></i>Shopping Cart</span>
+                <button class="btn btn-sm btn-outline-danger" onclick="clearCart()">
+                    <i class="bi bi-trash me-1"></i>Clear Cart
+                </button>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th style="width:40px">#</th>
+                                <th>Product</th>
+                                <th class="text-end">Price</th>
+                                <th class="text-center">Qty</th>
+                                <th class="text-end">Subtotal</th>
+                                <th style="width:50px"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="cart-body">
+                            {% for item in cart %}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                <td>{{ item.name }}</td>
+                                <td class="text-end">${{ "%.2f"|format(item.price) }}</td>
+                                <td class="text-center">{{ item.quantity }}</td>
+                                <td class="text-end">${{ "%.2f"|format(item.subtotal) }}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-danger btn-action"
+                                            onclick="removeFromCart({{ loop.index0 }})">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% if not cart %}
+                <div class="empty-state" id="cart-empty">
+                    <i class="bi bi-cart-x d-block"></i>
+                    <p class="mb-0">Cart is empty — scan a product to begin</p>
+                </div>
+                {% else %}
+                <div class="empty-state" id="cart-empty" style="display:none">
+                    <i class="bi bi-cart-x d-block"></i>
+                    <p class="mb-0">Cart is empty — scan a product to begin</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Right: Summary & Recent Sales -->
+    <div class="col-lg-5">
+        <!-- Order Summary -->
+        <div class="card mb-3 cart-summary">
+            <div class="card-header">
+                <i class="bi bi-receipt me-2"></i>Order Summary
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Items</span>
+                    <span id="summary-items" class="fw-medium">{{ totals.item_count }}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Subtotal</span>
+                    <span id="summary-subtotal" class="fw-medium">${{ "%.2f"|format(totals.subtotal) }}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-3">
+                    <span class="text-muted">Tax (5%)</span>
+                    <span id="summary-tax" class="fw-medium">${{ "%.2f"|format(totals.tax) }}</span>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between mb-4">
+                    <span class="fs-5 fw-bold">TOTAL</span>
+                    <span class="total-line text-success" id="summary-total">${{ "%.2f"|format(totals.total) }}</span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small text-muted">Payment Method</label>
+                    <select id="payment-method" class="form-select">
+                        <option value="Cash">Cash</option>
+                        <option value="Card">Card</option>
+                        <option value="Mobile">Mobile</option>
+                    </select>
+                </div>
+
+                <button class="btn btn-success w-100 checkout-btn" onclick="checkout()">
+                    <i class="bi bi-check-circle me-2"></i>Checkout
+                </button>
+            </div>
+        </div>
+
+        <!-- Recent Sales -->
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-clock-history me-2"></i>Recent Sales
+            </div>
+            <div class="card-body p-0">
+                {% if recent_sales %}
+                <div class="table-responsive">
+                    <table class="table table-hover table-sm mb-0">
+                        <thead>
+                            <tr>
+                                <th>Sale #</th>
+                                <th>Date</th>
+                                <th class="text-center">Items</th>
+                                <th class="text-end">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for s in recent_sales %}
+                            <tr class="cursor-pointer" onclick="window.open('/receipt/{{ s.id }}', '_blank')">
+                                <td><span class="text-primary fw-bold">#{{ s.id }}</span></td>
+                                <td class="small">{{ s.created_at[:16] if s.created_at else '' }}</td>
+                                <td class="text-center">{{ s.item_count }}</td>
+                                <td class="text-end fw-bold">${{ "%.2f"|format(s.total) }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="empty-state py-3">
+                    <p class="mb-0 small">No sales yet</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Product Picker Modal -->
+<div class="modal fade" id="pickerModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Select Product</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted">Multiple products matched. Select one:</p>
+                <div class="list-group" id="picker-list"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
